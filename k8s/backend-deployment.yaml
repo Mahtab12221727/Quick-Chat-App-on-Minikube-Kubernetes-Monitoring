@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quick-chat-api
+  namespace: quick-chat
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: quick-chat-api
+  template:
+    metadata:
+      labels:
+        app: quick-chat-api
+    spec:
+      containers:
+        - name: quick-chat-api
+          image: quick-chat-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "5000"
+            - name: MONGO_URI
+              value: "mongodb://mongo:27017/quick-chat"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: quick-chat-secrets
+                  key: jwt-secret
+            - name: CLOUDINARY_CLOUD_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: quick-chat-secrets
+                  key: cloudinary-cloud-name
+            - name: CLOUDINARY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: quick-chat-secrets
+                  key: cloudinary-api-key
+            - name: CLOUDINARY_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: quick-chat-secrets
+                  key: cloudinary-api-secret
+          readinessProbe:
+            httpGet:
+              path: /api/status
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/status
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 20

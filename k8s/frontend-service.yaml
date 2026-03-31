@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: quick-chat-web
+  namespace: quick-chat
+spec:
+  type: LoadBalancer
+  selector:
+    app: quick-chat-web
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http
